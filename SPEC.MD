@@ -271,8 +271,6 @@ The game is tested through one seam: the game engine's *create a game* and *appl
 
 ## Further Notes
 
-The project is due November 10, 2026 for ACCT 2301, with about 5+ hours of work per week.
-
 | Week | Build | Done when |
 | --- | --- | --- |
 | 1 | Engine skeleton, ledger, grader, a hard-coded opening balance sheet, first card templates, the entry builder screen | A player can record entries and see "yours vs. correct". This is a submittable fallback. |

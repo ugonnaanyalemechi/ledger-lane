@@ -53,3 +53,11 @@ Run build, lint and test before calling any task done.
 - Write card templates or their one-line reasons. The developer writes these. Build the template structure and validation only.
 - Reach into engine internals from the UI or from tests.
 - Commit secrets.
+
+## Agent skills
+
+**Issue tracker**
+- Issues live in GitHub Issues (via the `gh` CLI). See `docs/agents/issue-tracker.md`.
+
+**Domain docs**
+- Single-context: one `GLOSSARY.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
