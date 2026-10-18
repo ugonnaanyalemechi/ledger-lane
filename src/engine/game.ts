@@ -4,6 +4,8 @@ import type { Rng } from './random'
 
 export type Mode = 'Quick' | 'Full Year'
 
+export type Phase = 'Opening balance sheet'
+
 export interface GameConfig {
   playerNames: string[]
   mode: Mode
@@ -17,7 +19,7 @@ export interface Player {
 }
 
 export interface GameState {
-  phase: 'Opening balance sheet'
+  phase: Phase
   mode: Mode
   seed: number
   players: Player[]
@@ -30,6 +32,7 @@ export type Action = { type: 'confirmHandoff' }
 export type Result = { ok: true; state: GameState } | { ok: false; reason: string }
 
 const MAX_PLAYERS = 4
+const MAX_SEED = 0xffffffff
 
 export function createGame(config: GameConfig): Result {
   const { playerNames, mode, seed } = config
@@ -42,10 +45,11 @@ export function createGame(config: GameConfig): Result {
   if (mode !== 'Quick' && mode !== 'Full Year') {
     return { ok: false, reason: 'Mode must be Quick or Full Year.' }
   }
-  if (!Number.isInteger(seed)) {
-    return { ok: false, reason: 'Seed must be a whole number.' }
+  if (!Number.isInteger(seed) || seed < 0 || seed > MAX_SEED) {
+    return { ok: false, reason: `Seed must be a whole number from 0 to ${MAX_SEED}.` }
   }
 
+  // Generation advances this local generator; the state keeps its own copy of where it ended.
   const rng: Rng = { state: seed | 0 }
   const openingBalanceSheet = generateOpeningBalances(rng)
   return {
@@ -56,7 +60,7 @@ export function createGame(config: GameConfig): Result {
       seed,
       players: playerNames.map((name) => ({ name: name.trim(), balances: { ...openingBalanceSheet } })),
       openingBalanceSheet,
-      rng,
+      rng: { ...rng },
     },
   }
 }

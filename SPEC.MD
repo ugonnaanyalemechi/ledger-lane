@@ -125,6 +125,7 @@ Amounts, the opening balance sheet and the adjustment draws are random each game
 
 - All rules live in a game engine with no UI code. React screens only render engine state and send player actions to it.
 - The engine exposes two operations: *create a game* from a config (player names, mode, seed) and *apply an action* to a state, returning the new state. Invalid actions (e.g. rolling during Quarter-End) are rejected with a reason and leave the state unchanged.
+- Create-game validation: 1 to 4 players, no empty or whitespace-only names (names are stored trimmed), mode Quick or Full Year, seed a whole number from 0 to 4294967295 (32 bits, so distinct seeds never collide).
 - Actions: roll die, submit entry, submit correction, skip corrections, submit adjustment, submit closing entry, confirm pass-screen handoff.
 - All randomness (dice, card amounts, opening balances, adjustment draws, space layout) comes from a seeded random generator inside the state, so the same seed and the same actions always produce the same game.
 - Game phases, in order: Setup → Opening balance sheet → Months (rolling and transactions) → Quarter-End (corrections, then adjustments) → repeat for remaining quarters → Closing → Audit → Standings.

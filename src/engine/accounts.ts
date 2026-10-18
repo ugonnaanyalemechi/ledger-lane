@@ -1,14 +1,13 @@
 export type AccountType = 'Asset' | 'Liability' | 'Equity' | 'Revenue' | 'Expense'
 
-export interface Account {
-  name: string
+export interface Account<Name extends string = string> {
+  name: Name
   type: AccountType
   /** Contra accounts carry the opposite of their type's normal side. */
   contra?: boolean
 }
 
-/** Textbook chart of accounts (Libby, Financial Accounting, Ch. 4). */
-export const CHART_OF_ACCOUNTS: readonly Account[] = [
+const ACCOUNTS = [
   { name: 'Cash', type: 'Asset' },
   { name: 'Accounts Receivable', type: 'Asset' },
   { name: 'Supplies', type: 'Asset' },
@@ -33,7 +32,11 @@ export const CHART_OF_ACCOUNTS: readonly Account[] = [
   { name: 'Depreciation Expense', type: 'Expense' },
   { name: 'Interest Expense', type: 'Expense' },
   { name: 'Advertising Expense', type: 'Expense' },
-]
+] as const satisfies readonly Account[]
+
+export type AccountName = (typeof ACCOUNTS)[number]['name']
+
+export const CHART_OF_ACCOUNTS: readonly Account<AccountName>[] = ACCOUNTS
 
 /** Balances in whole dollars, shown on each account's normal side. */
-export type Balances = Record<string, number>
+export type Balances = Record<AccountName, number>

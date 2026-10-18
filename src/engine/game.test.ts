@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { applyAction, CHART_OF_ACCOUNTS, createGame, type Balances } from './index'
+import {
+  applyAction,
+  CHART_OF_ACCOUNTS,
+  createGame,
+  type AccountType,
+  type Balances,
+  type GameConfig,
+} from './index'
 
 const config = { playerNames: ['Ana', 'Ben'], mode: 'Quick' as const, seed: 42 }
 
@@ -9,7 +16,7 @@ function newGame(overrides: Partial<typeof config> = {}) {
   return result.state
 }
 
-const total = (balances: Balances, type: string, contra = false) =>
+const total = (balances: Balances, type: AccountType, contra = false) =>
   CHART_OF_ACCOUNTS.filter((a) => a.type === type && !!a.contra === contra).reduce(
     (sum, a) => sum + balances[a.name],
     0,
@@ -26,6 +33,24 @@ describe('creating a game', () => {
     expect(newGame({ seed: 1 }).openingBalanceSheet).not.toEqual(
       newGame({ seed: 2 }).openingBalanceSheet,
     )
+  })
+
+  it('gives varied opening balances across many seeds', () => {
+    const sheets = seeds.map((seed) => JSON.stringify(newGame({ seed }).openingBalanceSheet))
+    expect(new Set(sheets).size).toBeGreaterThan(190)
+  })
+
+  it('does not wrap the top of the seed range back onto seed 0', () => {
+    expect(newGame({ seed: 0xffffffff }).openingBalanceSheet).not.toEqual(
+      newGame({ seed: 0 }).openingBalanceSheet,
+    )
+  })
+
+  it('stores player names trimmed', () => {
+    expect(newGame({ playerNames: ['  Ana ', 'Ben'] }).players.map((p) => p.name)).toEqual([
+      'Ana',
+      'Ben',
+    ])
   })
 
   it('starts every player from the same opening balance sheet', () => {
@@ -63,7 +88,8 @@ describe('creating a game', () => {
     for (const seed of seeds) {
       const note = newGame({ seed }).openingBalanceSheet['Note Payable']
       expect(note).toBeGreaterThan(0)
-      expect((note * 6 * 3) % 1200).toBe(0)
+      const interestTimes1200 = note * 6 * 3 // dollars of interest = note * 6 * 3 / 1200
+      expect(interestTimes1200 % 1200).toBe(0)
     }
   })
 
@@ -80,6 +106,9 @@ describe('creating a game', () => {
     ['an empty name', { playerNames: ['Ana', ''] }],
     ['a blank name', { playerNames: ['Ana', '   '] }],
     ['a fractional seed', { seed: 1.5 }],
+    ['a negative seed', { seed: -1 }],
+    ['a seed above 32 bits', { seed: 2 ** 32 }],
+    ['an unknown mode', { mode: 'Half Year' as unknown as GameConfig['mode'] }],
   ])('rejects a config with %s, giving a reason', (_label, overrides) => {
     const result = createGame({ ...config, ...overrides })
     expect(result.ok).toBe(false)
