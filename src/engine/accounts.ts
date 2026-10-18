@@ -40,3 +40,15 @@ export const CHART_OF_ACCOUNTS: readonly Account<AccountName>[] = ACCOUNTS
 
 /** Balances in whole dollars, shown on each account's normal side. */
 export type Balances = Record<AccountName, number>
+
+export type Side = 'Debit' | 'Credit'
+
+export function findAccount(name: AccountName): Account<AccountName> {
+  return CHART_OF_ACCOUNTS.find((a) => a.name === name)!
+}
+
+/** The side that increases the account: assets and expenses are debit-normal, contra accounts flip it. */
+export function normalSide(account: Account): Side {
+  const debitType = account.type === 'Asset' || account.type === 'Expense'
+  return debitType !== !!account.contra ? 'Debit' : 'Credit'
+}
